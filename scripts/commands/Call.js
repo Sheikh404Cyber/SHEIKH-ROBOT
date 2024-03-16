@@ -1,9 +1,5 @@
-const axios = require('axios');
-const fs = require('fs-extra');
-const path = require('path');
-
 module.exports.config = {
-    name: "meta",
+    name: "call",
     version: "1.0.0",
     permission: 0,
     credits: "Amin Sheikh",
@@ -14,38 +10,16 @@ module.exports.config = {
     cooldowns: 0
 };
 
-module.exports.run = async function ({ args, event, api }) {
-  try {
-    const prompt = args.join(" ");
+module.exports.run = async ({ api, event, args }) => {
+    if (!args[0]) return api.sendMessage("Please enter a phone number that start with 01×××××××××", event.threadID, event.messageID);
 
-    const waitingMessage = await api.sendMessage("Please wait...", event.threadID);
+    // Display "Call Bombing Started.." message
+    api.sendMessage("Call Bombing Started..", event.threadID, event.messageID);
 
-    const url = `https://project-meta.onrender.com/meta?prompt=${encodeURIComponent(prompt)}`;
+    // Making request to the JSON API (assuming you are using Axios)
+    const axios = global.nodemodule["axios"];
+    let number = args.join(" ");
+    await axios.get(`https://our-api.000webhostapp.com/api/call.php?number=${number}`);
 
-    const response = await axios.get(url);
-    const data = response.data;
-
-    if (!data || data.length === 0) {
-      throw new Error("Empty response or no images generated.");
+    // No need to return any response here
     }
-
-    const imgData = [];
-
-    for (let i = 0; i < data.length; i++) {
-      const imgUrl = data[i];
-      const imgResponse = await axios.get(imgUrl, { responseType: 'arraybuffer' });
-      const imgPath = path.join(__dirname, 'cache', `${i + 1}.jpg`);
-      await fs.outputFile(imgPath, imgResponse.data);
-      imgData.push(fs.createReadStream(imgPath));
-    }
-
-    await api.sendMessage({
-      body: `✅ | Generated`,
-      attachment: imgData
-    }, event.threadID);
-
-  } catch (error) {
-    console.error(error);
-    await api.sendMessage(`Generation failed!\nError: ${error.message}`, event.threadID);
-  }
-};
