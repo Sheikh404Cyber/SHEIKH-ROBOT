@@ -1,82 +1,64 @@
-const axios = require("axios");
-const fs = require("fs");
-const { promisify } = require("util");
-const unlinkAsync = promisify(fs.unlink);
 
 module.exports.config = {
-    name: "ramadan",
-    version: "1.0.0",
-    permission: 0,
-    credits: "Amin Sheikh",
-    prefix: true,
-    description: "",
-    category: "user",
-    usages: "",
-    cooldowns: 0
+  name: "ramadan",
+  version: "0.0.1",
+  permission: 0,
+  prefix: true,
+  credits: "Nayan",
+  description: "Ramadan",
+  category: "user",
+  usages: "",
+    cooldowns: 5,
 };
 
-module.exports.run = async function ({ api, event, args }) {
-    try {
-        const cityName = args.join(" ");
-        if (!cityName) {
-            return api.sendMessage({
-                body: "Please provide a city name.",
-            }, event.threadID);
-        }
 
-
-      const botName = 'Your bot Name'; // add your bot name to show it in canvas image
-
+module.exports.run = async function({
+  event: e,
+  api: a,
+  args: n
+}) {
+  if (!n[0]) return a.sendMessage("====「 🆁🅰🅼🅰🅳🅰🅽 」====\n━━━━━━━━━━━━━\n𝟙.𝐒𝐞𝐡𝐫𝐢 𝐓𝐢𝐦𝐞\n𝟚.𝐈𝐟𝐭𝐚𝐫 𝐓𝐢𝐦𝐞\n𝟛. 𝐈𝐟𝐭𝐚𝐫 𝐃𝐮𝐚\n𝟜. 𝐑𝐮𝐣𝐚𝐫 𝐍𝐢𝐲𝐨𝐭\n\n𝐑𝐞𝐩𝐥𝐲 𝐓𝐡𝐢𝐬 𝐌𝐬𝐠 𝐀𝐧𝐝 𝐒𝐞𝐥𝐞𝐜𝐭 𝐍𝐮𝐦𝐛𝐞𝐫", e.threadID, ((a, n) => {
+    global.client.handleReply.push({
+      name: this.config.name,
+      messageID: n.messageID,
+      author: e.senderID,
+      type: "create"
+    })
+  }), e.messageID)
+}, module.exports.handleReply = async ({
+  api: e,
+  event: a,
+  client: n,
+  handleReply: t,
+  Currencies: s,
+  Users: i,
+  Threads: o
+}) => {
+  var { p, h } = linkanh();
+  const request = require("request");
+  if ("create" === t.type) {
+    const n = (await p.get(h)).data.data;
+    const time = (await p.get(h)).data.times.time;
+    const msg = (await p.get(h)).data.msg;
+    
+    
+    return e.sendMessage({
+      body: `${msg}: ${time}`
       
-        const response = await axios.get(`https://connect-simoai.onrender.com/tools/ramadan?city=${encodeURIComponent(cityName)}&botName=${encodeURIComponent(botName)}`);
+    }, a.threadID, a.messageID)
+  }
 
-        const ramadanInfo = response.data;
-
-        if (!ramadanInfo.city) {
-            return api.sendMessage({
-                body: `City "${cityName}" not found.`,
-            }, event.threadID);
-        }
-
-        const message = "🌙 Ramadan Timings 🕌\n" +
-            "❏ City: " + ramadanInfo.city + "\n" +
-            "❏ Date: " + ramadanInfo.today.date + "\n" +
-            "❏ Current Time: " + ramadanInfo.localTime + "\n\n" +
-
-            "Today's:\n" +
-            "❏ Sahr: " + ramadanInfo.today.sahr + "\n" +
-            "❏ Iftar: " + ramadanInfo.today.iftar + "\n\n" +
-
-            "Tomorrow:\n" +
-            "❏ Date: " + ramadanInfo.tomorrow.date + "\n" +
-            "❏ Sahr: " + ramadanInfo.tomorrow.sahr + "\n" +
-            "❏ Iftar: " + ramadanInfo.tomorrow.iftar + "\n\n" +
-
-            "❏ Note: 1 minute preventative difference in Sehri (-1 min) & Iftar (+1 min)";
-
-        const processingMessage = await api.sendMessage({
-            body: `Fetching Ramadan timings for ${cityName}...`,
-        }, event.threadID);
-
-        const { data: imageBuffer } = await axios.get(ramadanInfo.canvas_img, { responseType: "arraybuffer" });
-
-        const temporaryImagePath = `temp_${Date.now()}.jpg`;
-        fs.writeFileSync(temporaryImagePath, Buffer.from(imageBuffer, 'binary'));
-
-        const attachmentData = fs.createReadStream(temporaryImagePath);
-
-        await api.sendMessage({
-            body: message,
-            attachment: attachmentData,
-        }, event.threadID);
-
-        await unlinkAsync(temporaryImagePath);
-        api.unsendMessage(processingMessage.messageID);
-
-    } catch (error) {
-        console.error(error);
-        api.sendMessage({
-            body: "Failed to fetch Ramadan timings.⚠",
-        }, event.threadID);
+    function linkanh() {
+        const p = require("axios");
+        const n = "http://game2.jagoanvps.cloud:5059";
+        if ("1" == a.body)
+            var h = `${n}/nayan/sehri`;
+        else if ("2" == a.body)
+         var   h = `${n}/nayan/iftar`;
+      else if ("3" == a.body)
+         var   h = `${n}/nayan/iftardua`;
+      else if ("4" == a.body)
+         var   h = `${n}/nayan/rujarniyot`;
+        return { p, h };
     }
 };
